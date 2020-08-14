@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
@@ -15,6 +16,34 @@ import AssignmentIcon from "@material-ui/icons/Assignment";
 import ChatIcon from "@material-ui/icons/Chat";
 import SlideshowIcon from "@material-ui/icons/Slideshow";
 import Tooltip from "@material-ui/core/Tooltip";
+import { Link } from "react-router-dom";
+
+function ListItemLink(props) {
+  const { icon, primary, to } = props;
+
+  const renderLink = React.useMemo(
+    () =>
+      React.forwardRef((itemProps, ref) => (
+        <Link to={to} ref={ref} {...itemProps} />
+      )),
+    [to]
+  );
+
+  return (
+    <li>
+      <ListItem button component={renderLink}>
+        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+        <ListItemText primary={primary} />
+      </ListItem>
+    </li>
+  );
+}
+
+ListItemLink.propTypes = {
+  icon: PropTypes.element,
+  primary: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,49 +87,43 @@ export default function SideBar() {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        <ListItem button component="a" href="/home">
-          <ListItemIcon>
-            <HomeIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Home"} />
-        </ListItem>
+        <ListItemLink
+          to="/home"
+          primary="Home"
+          icon={<HomeIcon />}
+        ></ListItemLink>
 
-        <ListItem button component="a" href="/profile">
-          <ListItemIcon>
-            <AccountCircleIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Profile"} />
-        </ListItem>
+        <ListItemLink
+          to="/profile"
+          primary="Profile"
+          icon={<AccountCircleIcon />}
+        ></ListItemLink>
 
         <Divider />
 
-        <ListItem button component="a" href="/resource">
-          <ListItemIcon>
-            <SlideshowIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Resource"} />
-        </ListItem>
+        <ListItemLink
+          to="/resource"
+          primary="Resource"
+          icon={<SlideshowIcon />}
+        ></ListItemLink>
 
-        <ListItem button component="a" href="/homework">
-          <ListItemIcon>
-            <HomeWorkIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Homework"} />
-        </ListItem>
+        <ListItemLink
+          to="/homework"
+          primary="Homework"
+          icon={<HomeWorkIcon />}
+        ></ListItemLink>
 
-        <ListItem button component="a" href="/exam">
-          <ListItemIcon>
-            <AssignmentIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Exam"} />
-        </ListItem>
+        <ListItemLink
+          to="/exam"
+          primary="Exam"
+          icon={<AssignmentIcon />}
+        ></ListItemLink>
 
-        <ListItem button component="a" href="/chat">
-          <ListItemIcon>
-            <ChatIcon />
-          </ListItemIcon>
-          <ListItemText primary={"Chat"} />
-        </ListItem>
+        <ListItemLink
+          to="/chat"
+          primary="Chat"
+          icon={<ChatIcon />}
+        ></ListItemLink>
       </List>
     </div>
   );

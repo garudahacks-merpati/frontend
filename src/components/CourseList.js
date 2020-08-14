@@ -3,8 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import GridList from "@material-ui/core/GridList";
 import GridListTile from "@material-ui/core/GridListTile";
 import GridListTileBar from "@material-ui/core/GridListTileBar";
-import IconButton from "@material-ui/core/IconButton";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
 import CourseData from "../data/CourseData";
 
 const useStyles = makeStyles((theme) => ({
@@ -19,9 +17,6 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "nowrap",
     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
     transform: "translateZ(0)",
-  },
-  title: {
-    color: theme.palette.primary.light,
   },
   titleBar: {
     background:
@@ -61,11 +56,6 @@ export default function CourseList() {
                 root: classes.titleBar,
                 title: classes.title,
               }}
-              actionIcon={
-                <IconButton aria-label={`star ${tile.title}`}>
-                  <StarBorderIcon className={classes.title} />
-                </IconButton>
-              }
             />
           </GridListTile>
         ))}
