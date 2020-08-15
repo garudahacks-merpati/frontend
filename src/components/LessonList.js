@@ -49,6 +49,7 @@ const AccordionDetails = withStyles((theme) => ({
 export default class LessonList extends Component {
   constructor(props) {
     super(props);
+    console.log(this.props.courseId);
     this.state = {
       lessons: [],
       courseId: this.props.courseId,
@@ -64,8 +65,6 @@ export default class LessonList extends Component {
       }
     );
     const courseLessons = await result.json();
-    console.log(this.props.courseId);
-    console.log(courseLessons);
     this.setState({
       lessons: courseLessons,
     });
@@ -78,6 +77,30 @@ export default class LessonList extends Component {
   };
 
   render() {
-    return <div></div>;
+    return (
+      <div>
+        {this.state.lessons.length === 0 ? (
+          <p>No Data</p>
+        ) : (
+          this.state.lessons.map((lesson, index) => (
+            <Accordion
+              square
+              expanded={this.state.expanded === "panel1"}
+              onChange={this.handleChange("panel1")}
+            >
+              <AccordionSummary
+                aria-controls="panel1d-content"
+                id="panel1d-header"
+              >
+                <Typography>{lesson.title}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>{lesson.text}</Typography>
+              </AccordionDetails>
+            </Accordion>
+          ))
+        )}
+      </div>
+    );
   }
 }
