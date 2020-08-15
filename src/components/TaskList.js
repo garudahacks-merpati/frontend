@@ -11,6 +11,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Paper from "@material-ui/core/Paper";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -143,9 +144,12 @@ function TableRowLink(props) {
     >
       <TableCell padding="checkbox"></TableCell>
       <TableCell component="th" id={labelId} scope="row" padding="none">
-        {row.title}
+        History
       </TableCell>
-      <TableCell>{row.dateDue}</TableCell>
+      <TableCell>{row.title}</TableCell>
+      <TableCell>
+        {moment(row.dateDue).format("dddd, D MMMM YYYY (HH:mm)")}
+      </TableCell>
     </TableRow>
   );
 }
@@ -158,20 +162,22 @@ class TaskList extends Component {
       orderBy: "dateDue",
       page: 0,
       rowsPerPage: 5,
-      data: [],
+      assignments: [],
     };
   }
 
   async componentWillMount() {
     const result = await fetch(
-      `https://merpati-backend.azurewebsites.net/api/course//assignment`,
+      `https://merpati-backend.azurewebsites.net/api/user/${
+        JSON.parse(localStorage.getItem("user")).id
+      }/assignment`,
       {
         method: "GET",
       }
     );
-    const assignments = await result.json();
+    const userAssignments = await result.json();
     this.setState({
-      data: assignments,
+      assignments: userAssignments,
     });
   }
 
@@ -202,7 +208,7 @@ class TaskList extends Component {
     if (!this.state.assignments)
       return (
         <div>
-          <p>There are no data</p>
+          <p>There are no assignment</p>
         </div>
       );
 
@@ -221,11 +227,11 @@ class TaskList extends Component {
                 order={this.state.order}
                 orderBy={this.state.orderBy}
                 onRequestSort={this.handleRequestSort}
-                rowCount={this.state.data.length}
+                rowCount={this.state.assignments.length}
               />
               <TableBody>
                 {stableSort(
-                  this.state.data,
+                  this.state.assignments,
                   getComparator(this.state.order, this.state.orderBy)
                 )
                   .slice(
@@ -246,7 +252,7 @@ class TaskList extends Component {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={this.state.data.length}
+            count={this.state.assignments.length}
             rowsPerPage={this.state.rowsPerPage}
             page={this.state.page}
             onChangePage={this.handleChangePage}
