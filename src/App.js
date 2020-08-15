@@ -8,6 +8,7 @@ import Resource from "./pages/Resource";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgetPassword from "./pages/ForgetPassword";
+import CourseDetail from "./pages/CourseDetail";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/home" component={Home}></Route>
         <Route path="/profile" component={Profile}></Route>
         <Route path="/resource" component={Resource}></Route>
+        <Route path="/course/:courseId" component={CourseDetail}></Route>
       </Switch>
     </Router>
   );
