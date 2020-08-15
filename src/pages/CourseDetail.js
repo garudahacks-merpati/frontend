@@ -116,7 +116,8 @@ class CourseDetail extends Component {
               <AssignmentList courseId={this.state.courseId}></AssignmentList>
             </TabPanel>
             <TabPanel value={this.state.activeTabIndex} index={2}>
-              Item Three
+              Work in Progress
+              <AssignmentList courseId={this.state.courseId}></AssignmentList>
             </TabPanel>
           </Paper>
         </Container>

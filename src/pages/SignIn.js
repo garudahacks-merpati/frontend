@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -12,6 +12,8 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import Cotter from "cotter";
+import { Redirect } from "react-router";
 
 function Copyright() {
   return (
@@ -46,8 +48,35 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignIn() {
+export default function SignIn(props) {
   const classes = useStyles();
+  const [payload, setpayload] = useState(null);
+
+  useEffect(() => {
+    var cotter = new Cotter("6b7d016a-1510-4454-b74c-83d3a5b47f5c"); // 👈 Specify your API KEY ID here
+    cotter
+      .signInWithLink() // use .signInWithOTP() to send an OTP
+      .showEmailForm() // use .showPhoneForm() to send magic link to a phone number
+      .then(async (response) => {
+        setpayload(response); // show the response in our state
+        props.history.push("/home");
+        const result = await fetch(
+          `https://merpati-backend.azurewebsites.net/api/user/login`,
+          {
+            method: "POST",
+            body: {
+              email: response.email,
+            },
+          }
+        );
+
+        const auth = await result.json();
+        console.log(auth);
+        window.userId = response.email;
+        if (auth) props.history.push("/home");
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -59,50 +88,7 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Sign In
-          </Button>
-          <Grid container>
-            <Grid item>
-              <Link href="signup" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
+        <div id="cotter-form-container" />
       </div>
       <Box mt={8}>
         <Copyright />
