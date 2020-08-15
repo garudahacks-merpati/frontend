@@ -1,6 +1,6 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -11,17 +11,6 @@ import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Paper from "@material-ui/core/Paper";
 import { Link } from "react-router-dom";
-
-function createData(id, course, assignment, deadline) {
-  return { id, course, assignment, deadline };
-}
-
-const rows = [
-  createData(1, "Physics", "Homework 1", "12/23/2020"),
-  createData(2, "Biology", "Homework 3", "12/25/2020"),
-  createData(3, "Economic", "Homework 1", "12/26/2020"),
-  createData(4, "Social", "Homework 1", "12/29/2020"),
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -104,7 +93,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = (theme) => ({
   root: {
     width: "100%",
   },
@@ -126,22 +115,22 @@ const useStyles = makeStyles((theme) => ({
     top: 20,
     width: 1,
   },
-}));
+});
 
 function TableRowLink(props) {
-  const { labelId, name, course, assignment, deadline, to } = props;
+  const { labelId, row } = props;
 
   const CustomLink = React.useMemo(
     () =>
       React.forwardRef((linkProps, ref) => (
         <Link
           ref={ref}
-          to={to}
+          to={row.id}
           {...linkProps}
           style={{ textDecoration: "None" }}
         />
       )),
-    [to]
+    [row.id]
   );
 
   return (
@@ -149,89 +138,124 @@ function TableRowLink(props) {
       hover
       role="checkbox"
       tabIndex={-1}
-      key={name}
+      key={row.id}
       component={CustomLink}
     >
       <TableCell padding="checkbox"></TableCell>
       <TableCell component="th" id={labelId} scope="row" padding="none">
-        {course}
+        {row.title}
       </TableCell>
-      <TableCell>{assignment}</TableCell>
-      <TableCell>{deadline}</TableCell>
+      <TableCell>{row.dateDue}</TableCell>
     </TableRow>
   );
 }
 
-export default function TaskList() {
-  const classes = useStyles();
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("deadline");
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+class TaskList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      order: "asc",
+      orderBy: "dateDue",
+      page: 0,
+      rowsPerPage: 5,
+      data: [],
+    };
+  }
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+  async componentWillMount() {
+    const result = await fetch(
+      `https://merpati-backend.azurewebsites.net/api/course//assignment`,
+      {
+        method: "GET",
+      }
+    );
+    const assignments = await result.json();
+    this.setState({
+      data: assignments,
+    });
+  }
+
+  handleRequestSort = (event, property) => {
+    const isAsc = this.state.orderBy === property && this.state.order === "asc";
+    this.setState({
+      order: isAsc ? "desc" : "asc",
+      orderBy: property,
+    });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  handleChangePage = (event, newPage) => {
+    this.setState({
+      page: newPage,
+    });
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  handleChangeRowsPerPage = (event) => {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
   };
 
-  return (
-    <div className={classes.root}>
-      <Paper className={classes.paper}>
-        <TableContainer>
-          <Table
-            className={classes.table}
-            aria-labelledby="tableTitle"
-            size={"medium"}
-            aria-label="enhanced table"
-          >
-            <EnhancedTableHead
-              classes={classes}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
+  render() {
+    const { classes } = this.props;
 
-                  return (
-                    <TableRowLink
-                      labelId={labelId}
-                      name={row.name}
-                      course={row.course}
-                      assignment={row.assignment}
-                      deadline={row.deadline}
-                      to={`/course/${row.id}`}
-                      key={row.id}
-                    ></TableRowLink>
-                  );
-                })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </div>
-  );
+    if (!this.state.assignments)
+      return (
+        <div>
+          <p>There are no data</p>
+        </div>
+      );
+
+    return (
+      <div className={classes.root}>
+        <Paper className={classes.paper}>
+          <TableContainer>
+            <Table
+              className={classes.table}
+              aria-labelledby="tableTitle"
+              size={"medium"}
+              aria-label="enhanced table"
+            >
+              <EnhancedTableHead
+                classes={classes}
+                order={this.state.order}
+                orderBy={this.state.orderBy}
+                onRequestSort={this.handleRequestSort}
+                rowCount={this.state.data.length}
+              />
+              <TableBody>
+                {stableSort(
+                  this.state.data,
+                  getComparator(this.state.order, this.state.orderBy)
+                )
+                  .slice(
+                    this.state.page * this.state.rowsPerPage,
+                    this.state.page * this.state.rowsPerPage +
+                      this.state.rowsPerPage
+                  )
+                  .map((row, index) => {
+                    const labelId = `enhanced-table-checkbox-${index}`;
+
+                    return (
+                      <TableRowLink labelId={labelId} row={row}></TableRowLink>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={this.state.data.length}
+            rowsPerPage={this.state.rowsPerPage}
+            page={this.state.page}
+            onChangePage={this.handleChangePage}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          />
+        </Paper>
+      </div>
+    );
+  }
 }
+
+export default withStyles(useStyles)(TaskList);
