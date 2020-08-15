@@ -59,21 +59,24 @@ export default function SignIn(props) {
       .showEmailForm() // use .showPhoneForm() to send magic link to a phone number
       .then(async (response) => {
         setpayload(response); // show the response in our state
-        props.history.push("/home");
         const result = await fetch(
           `https://merpati-backend.azurewebsites.net/api/user/login`,
           {
             method: "POST",
-            body: {
-              email: response.email,
+            headers: {
+              "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+              email: response.email,
+            }),
           }
         );
 
         const auth = await result.json();
-        console.log(auth);
-        window.userId = response.email;
-        if (auth) props.history.push("/home");
+        if (auth) {
+          localStorage.setItem("user", JSON.stringify(auth));
+          props.history.push("/home");
+        }
       })
       .catch((err) => console.log(err));
   }, []);
