@@ -8,6 +8,7 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import LessonList from "../components/LessonList";
+import AssignmentList from "../components/AssignmentList";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -73,7 +74,7 @@ class CourseDetail extends Component {
       }
     );
     const course = await result.json();
-    console.log(course);
+    console.log(params.courseId);
     this.setState({
       name: course.name,
       courseId: params.courseId,
@@ -85,7 +86,6 @@ class CourseDetail extends Component {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <div>
         <NavBar name={"Course: " + this.state.name}></NavBar>
@@ -101,10 +101,12 @@ class CourseDetail extends Component {
             <Tab label="Exam" {...a11yProps(2)} />
           </Tabs>
           <TabPanel value={this.state.activeTabIndex} index={0}>
-            <LessonList courseId={this.state.courseId}></LessonList>
+            {!this.state.courseId || (
+              <LessonList courseId={this.state.courseId}></LessonList>
+            )}
           </TabPanel>
           <TabPanel value={this.state.activeTabIndex} index={1}>
-            Item Two
+            <AssignmentList></AssignmentList>
           </TabPanel>
           <TabPanel value={this.state.activeTabIndex} index={2}>
             Item Three

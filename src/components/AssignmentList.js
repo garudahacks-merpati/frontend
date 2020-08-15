@@ -10,7 +10,11 @@ import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Paper from "@material-ui/core/Paper";
-import { Link } from "react-router-dom";
+import Collapse from "@material-ui/core/Collapse";
+import Typography from "@material-ui/core/Typography";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
+import IconButton from "@material-ui/core/IconButton";
 
 function createData(id, course, assignment, deadline) {
   return { id, course, assignment, deadline };
@@ -50,13 +54,13 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
+  { id: "blank", numeric: false, disablePadding: false, label: "" },
   {
-    id: "course",
+    id: "assignment",
     numeric: false,
     disablePadding: true,
-    label: "Course",
+    label: "Title",
   },
-  { id: "assignment", numeric: false, disablePadding: false, label: "Title" },
   { id: "deadline", numeric: false, disablePadding: false, label: "Deadline" },
 ];
 
@@ -128,41 +132,58 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function TableRowLink(props) {
-  const { labelId, name, course, assignment, deadline, to } = props;
-
-  const CustomLink = React.useMemo(
-    () =>
-      React.forwardRef((linkProps, ref) => (
-        <Link
-          ref={ref}
-          to={to}
-          {...linkProps}
-          style={{ textDecoration: "None" }}
-        />
-      )),
-    [to]
-  );
+function TableRowCollapse(props) {
+  const { row } = props;
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <TableRow
-      hover
-      role="checkbox"
-      tabIndex={-1}
-      key={name}
-      component={CustomLink}
-    >
-      <TableCell padding="checkbox"></TableCell>
-      <TableCell component="th" id={labelId} scope="row" padding="none">
-        {course}
-      </TableCell>
-      <TableCell>{assignment}</TableCell>
-      <TableCell>{deadline}</TableCell>
-    </TableRow>
+    <React.Fragment>
+      <TableRow>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell component="th" scope="row">
+          {row.name}
+        </TableCell>
+        <TableCell>{row.assignment}</TableCell>
+        <TableCell>{row.deadline}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Typography variant="h6">{row.assignment}</Typography>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
   );
 }
 
-export default function TaskList() {
+TableRowCollapse.propTypes = {
+  row: PropTypes.shape({
+    calories: PropTypes.number.isRequired,
+    carbs: PropTypes.number.isRequired,
+    fat: PropTypes.number.isRequired,
+    history: PropTypes.arrayOf(
+      PropTypes.shape({
+        amount: PropTypes.number.isRequired,
+        customerId: PropTypes.string.isRequired,
+        date: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    protein: PropTypes.number.isRequired,
+  }).isRequired,
+};
+
+export default function AssignmentList() {
   const classes = useStyles();
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("deadline");
@@ -205,19 +226,7 @@ export default function TaskList() {
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const labelId = `enhanced-table-checkbox-${index}`;
-
-                  return (
-                    <TableRowLink
-                      labelId={labelId}
-                      name={row.name}
-                      course={row.course}
-                      assignment={row.assignment}
-                      deadline={row.deadline}
-                      to={`/course/${row.id}`}
-                      key={row.id}
-                    ></TableRowLink>
-                  );
+                  return <TableRowCollapse row={row}></TableRowCollapse>;
                 })}
             </TableBody>
           </Table>
