@@ -1,6 +1,6 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -15,17 +15,9 @@ import Typography from "@material-ui/core/Typography";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import IconButton from "@material-ui/core/IconButton";
-
-function createData(id, course, assignment, deadline) {
-  return { id, course, assignment, deadline };
-}
-
-const rows = [
-  createData(1, "Physics", "Homework 1", "12/23/2020"),
-  createData(2, "Biology", "Homework 3", "12/25/2020"),
-  createData(3, "Economic", "Homework 1", "12/26/2020"),
-  createData(4, "Social", "Homework 1", "12/29/2020"),
-];
+import AddIcon from "@material-ui/icons/Add";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import HistoryIcon from "@material-ui/icons/History";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -54,14 +46,13 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: "blank", numeric: false, disablePadding: false, label: "" },
   {
-    id: "assignment",
+    id: "title",
     numeric: false,
     disablePadding: true,
     label: "Title",
   },
-  { id: "deadline", numeric: false, disablePadding: false, label: "Deadline" },
+  { id: "dateDue", numeric: false, disablePadding: false, label: "Deadline" },
 ];
 
 function EnhancedTableHead(props) {
@@ -95,6 +86,9 @@ function EnhancedTableHead(props) {
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell key={"action"} align={"left"} padding={"default"}>
+          Action
+        </TableCell>
       </TableRow>
     </TableHead>
   );
@@ -108,7 +102,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = (theme) => ({
   root: {
     width: "100%",
   },
@@ -130,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
     top: 20,
     width: 1,
   },
-}));
+});
 
 function TableRowCollapse(props) {
   const { row } = props;
@@ -149,15 +143,27 @@ function TableRowCollapse(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {row.name}
+          {row.title}
         </TableCell>
-        <TableCell>{row.assignment}</TableCell>
-        <TableCell>{row.deadline}</TableCell>
+        <TableCell>{row.dateDue}</TableCell>
+        <TableCell>
+          <IconButton aria-label="submit answer" size="small">
+            <AddIcon></AddIcon>
+          </IconButton>
+          <IconButton aria-label="download case" size="small">
+            <GetAppIcon></GetAppIcon>
+          </IconButton>
+          <IconButton aria-label="answer history" size="small">
+            <HistoryIcon></HistoryIcon>
+          </IconButton>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Typography variant="h6">{row.assignment}</Typography>
+            <Typography variant="body2" style={{ padding: "20px 0" }}>
+              {row.text}
+            </Typography>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -183,64 +189,101 @@ TableRowCollapse.propTypes = {
   }).isRequired,
 };
 
-export default function AssignmentList() {
-  const classes = useStyles();
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("deadline");
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+class AssignmentList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      courseId: this.props.courseId,
+      order: "asc",
+      orderBy: "dateDue",
+      page: 0,
+      rowsPerPage: 5,
+      assignments: [],
+    };
+  }
 
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+  async componentWillMount() {
+    const result = await fetch(
+      `https://merpati-backend.azurewebsites.net/api/course/${this.state.courseId}/assignment`,
+      {
+        method: "GET",
+      }
+    );
+    const courseAssignments = await result.json();
+    this.setState({
+      assignments: courseAssignments,
+    });
+  }
+
+  handleRequestSort = (event, property) => {
+    const isAsc = this.state.orderBy === property && this.state.order === "asc";
+    this.setState({
+      order: isAsc ? "desc" : "asc",
+      orderBy: property,
+    });
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  handleChangePage = (event, newPage) => {
+    this.setState({
+      page: newPage,
+    });
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+  handleChangeRowsPerPage = (event) => {
+    this.setState({
+      rowsPerPage: parseInt(event.target.value, 10),
+      page: 0,
+    });
   };
 
-  return (
-    <div className={classes.root}>
-      <Paper className={classes.paper}>
-        <TableContainer>
-          <Table
-            className={classes.table}
-            aria-labelledby="tableTitle"
-            size={"medium"}
-            aria-label="enhanced table"
-          >
-            <EnhancedTableHead
-              classes={classes}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  return <TableRowCollapse row={row}></TableRowCollapse>;
-                })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </div>
-  );
+  render() {
+    const { classes } = this.props;
+    return (
+      <div className={classes.root}>
+        <Paper className={classes.paper}>
+          <TableContainer>
+            <Table
+              className={classes.table}
+              aria-labelledby="tableTitle"
+              size={"medium"}
+              aria-label="enhanced table"
+            >
+              <EnhancedTableHead
+                classes={classes}
+                order={this.state.order}
+                orderBy={this.state.orderBy}
+                onRequestSort={this.handleRequestSort}
+                rowCount={this.state.assignments.length}
+              />
+              <TableBody>
+                {stableSort(
+                  this.state.assignments,
+                  getComparator(this.state.order, this.state.orderBy)
+                )
+                  .slice(
+                    this.state.page * this.state.rowsPerPage,
+                    this.state.page * this.state.rowsPerPage +
+                      this.state.rowsPerPage
+                  )
+                  .map((row, index) => {
+                    return <TableRowCollapse row={row}></TableRowCollapse>;
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={this.state.assignments.length}
+            rowsPerPage={this.state.rowsPerPage}
+            page={this.state.page}
+            onChangePage={this.handleChangePage}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          />
+        </Paper>
+      </div>
+    );
+  }
 }
+
+export default withStyles(useStyles)(AssignmentList);

@@ -9,6 +9,7 @@ import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import LessonList from "../components/LessonList";
 import AssignmentList from "../components/AssignmentList";
+import Paper from "@material-ui/core/Paper";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -45,11 +46,16 @@ function a11yProps(index) {
 
 const useStyles = (theme) => ({
   section: {
-    "margin-top": "25px",
+    margin: "20px",
   },
 
   contentTitle: {
     "margin-bottom": "10px",
+  },
+
+  paper: {
+    padding: "5px 0",
+    margin: "25px 0",
   },
 });
 
@@ -74,7 +80,6 @@ class CourseDetail extends Component {
       }
     );
     const course = await result.json();
-    console.log(params.courseId);
     this.setState({
       name: course.name,
       courseId: params.courseId,
@@ -86,31 +91,34 @@ class CourseDetail extends Component {
   };
 
   render() {
+    const { classes } = this.props;
     return (
       <div>
         <NavBar name={"Course: " + this.state.name}></NavBar>
         <Container maxWidth="lg">
-          <Tabs
-            value={this.state.activeTabIndex}
-            onChange={this.handleChange}
-            aria-label="simple tabs example"
-            variant="fullWidth"
-          >
-            <Tab label="Lesson" {...a11yProps(0)} />
-            <Tab label="Assignment" {...a11yProps(1)} />
-            <Tab label="Exam" {...a11yProps(2)} />
-          </Tabs>
-          <TabPanel value={this.state.activeTabIndex} index={0}>
-            {!this.state.courseId || (
-              <LessonList courseId={this.state.courseId}></LessonList>
-            )}
-          </TabPanel>
-          <TabPanel value={this.state.activeTabIndex} index={1}>
-            <AssignmentList></AssignmentList>
-          </TabPanel>
-          <TabPanel value={this.state.activeTabIndex} index={2}>
-            Item Three
-          </TabPanel>
+          <Paper elevation={3} className={classes.paper}>
+            <Tabs
+              value={this.state.activeTabIndex}
+              onChange={this.handleChange}
+              aria-label="simple tabs example"
+              variant="fullWidth"
+            >
+              <Tab label="Lesson" {...a11yProps(0)} />
+              <Tab label="Assignment" {...a11yProps(1)} />
+              <Tab label="Exam" {...a11yProps(2)} />
+            </Tabs>
+            <TabPanel value={this.state.activeTabIndex} index={0}>
+              {!this.state.courseId || (
+                <LessonList courseId={this.state.courseId}></LessonList>
+              )}
+            </TabPanel>
+            <TabPanel value={this.state.activeTabIndex} index={1}>
+              <AssignmentList courseId={this.state.courseId}></AssignmentList>
+            </TabPanel>
+            <TabPanel value={this.state.activeTabIndex} index={2}>
+              Item Three
+            </TabPanel>
+          </Paper>
         </Container>
       </div>
     );

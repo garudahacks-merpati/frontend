@@ -11,7 +11,6 @@ const useStyles = (theme) => ({
     flexWrap: "wrap",
     justifyContent: "space-around",
     overflow: "hidden",
-    // backgroundColor: theme.palette.background.paper,
   },
   gridList: {
     flexWrap: "nowrap",
@@ -37,8 +36,12 @@ function GridListTileLink(props) {
   );
 
   return (
-    <GridListTile component={renderLink}>
-      <img src={tile.image} alt={tile.name} />
+    <GridListTile component={renderLink} style={{ margin: "0 0" }}>
+      <img
+        src={tile.image}
+        alt={tile.name}
+        style={{ width: "250px", height: "250px" }}
+      />
       <GridListTileBar
         title={tile.name}
         classes={{

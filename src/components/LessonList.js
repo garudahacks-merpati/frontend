@@ -4,6 +4,9 @@ import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import IconButton from "@material-ui/core/IconButton";
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 
 const Accordion = withStyles({
   root: {
@@ -49,11 +52,10 @@ const AccordionDetails = withStyles((theme) => ({
 export default class LessonList extends Component {
   constructor(props) {
     super(props);
-    console.log(this.props.courseId);
     this.state = {
       lessons: [],
       courseId: this.props.courseId,
-      expanded: "panel1",
+      expanded: "",
     };
   }
 
@@ -85,14 +87,20 @@ export default class LessonList extends Component {
           this.state.lessons.map((lesson, index) => (
             <Accordion
               square
-              expanded={this.state.expanded === "panel1"}
-              onChange={this.handleChange("panel1")}
+              expanded={this.state.expanded === `panel${index}`}
+              onChange={this.handleChange(`panel${index}`)}
             >
               <AccordionSummary
-                aria-controls="panel1d-content"
-                id="panel1d-header"
+                aria-controls={`panel${index}d-content`}
+                id={`panel${index}d-header`}
+                expandIcon={<ExpandMoreIcon></ExpandMoreIcon>}
               >
-                <Typography>{lesson.title}</Typography>
+                <div>
+                  <IconButton>
+                    <PlayCircleOutlineIcon></PlayCircleOutlineIcon>
+                  </IconButton>
+                  <Typography>{lesson.title}</Typography>
+                </div>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography>{lesson.text}</Typography>
