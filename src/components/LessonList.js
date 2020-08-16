@@ -5,8 +5,7 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import IconButton from "@material-ui/core/IconButton";
-import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
+import TempButton from "./TempButton";
 
 const Accordion = withStyles({
   root: {
@@ -56,6 +55,7 @@ export default class LessonList extends Component {
       lessons: [],
       courseId: this.props.courseId,
       expanded: "",
+      iconState: {},
     };
   }
 
@@ -96,9 +96,7 @@ export default class LessonList extends Component {
                 expandIcon={<ExpandMoreIcon></ExpandMoreIcon>}
               >
                 <div>
-                  <IconButton>
-                    <PlayCircleOutlineIcon></PlayCircleOutlineIcon>
-                  </IconButton>
+                  <TempButton></TempButton>
                   <Typography>{lesson.title}</Typography>
                 </div>
               </AccordionSummary>
