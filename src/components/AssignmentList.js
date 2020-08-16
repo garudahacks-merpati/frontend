@@ -18,6 +18,7 @@ import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import HistoryIcon from "@material-ui/icons/History";
+import moment from "moment";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -145,7 +146,9 @@ function TableRowCollapse(props) {
         <TableCell component="th" scope="row">
           {row.title}
         </TableCell>
-        <TableCell>{row.dateDue}</TableCell>
+        <TableCell>
+          {moment(row.dateDue).format("dddd, D MMMM YYYY (HH:mm)")}
+        </TableCell>
         <TableCell>
           <IconButton aria-label="submit answer" size="small">
             <AddIcon></AddIcon>

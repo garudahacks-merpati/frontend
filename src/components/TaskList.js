@@ -46,8 +46,8 @@ const headCells = [
     disablePadding: true,
     label: "Course",
   },
-  { id: "assignment", numeric: false, disablePadding: false, label: "Title" },
-  { id: "deadline", numeric: false, disablePadding: false, label: "Deadline" },
+  { id: "title", numeric: false, disablePadding: false, label: "Title" },
+  { id: "dateDue", numeric: false, disablePadding: false, label: "Deadline" },
 ];
 
 function EnhancedTableHead(props) {
